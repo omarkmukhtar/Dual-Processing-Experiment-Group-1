@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Reading Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        /* Added margin to the reset button */
+        #resetButton {
+            margin-top: 50px; /* Adjust this value as necessary */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <p>In this experiment, a series of repeated numbers will be displayed, and you must say the number that is being repeatedly displayed. For example, if "5 5 5" is shown, you must say "5". As soon as the numbers appear on your screen, read it as fast as you can and say the repeated number, and then click "Next" to go to the next set.</p>
+        <p>20 sets of numbers will be shown, and after you finish the last one, the total time it took you to go through all of the numbers will be shown.</p>
+        <p>If you would like to continue with the experiment, press "Start" to begin.</p>
+        <button id="startButton" type="button">Start</button>
+    </div>
+
+    <!-- Countdown Screen -->
+    <div id="countdownScreen" class="hidden">
+        <h1 id="countdown"></h1>
+    </div>
+
+    <!-- Number Screen -->
+    <div id="numberScreen" class="hidden">
+        <h2 id="randomNumber"></h2>
+        <button id="nextButton" type="button">Next</button>
+    </div>
+
+    <!-- Final Screen -->
+    <div id="finalScreen" class="hidden">
+        <h3 id="finalMessage"></h3>
+        <button id="resetButton" type="button">Go Back to Start</button>
+    </div>
+
+    <script>
+        let startTime;
+        let currentStep = 0;
+        const totalSteps = 20;
+    
+        document.getElementById('startButton').addEventListener('click', startCountdown);
+        document.getElementById('nextButton').addEventListener('click', nextNumber);
+        document.getElementById('resetButton').addEventListener('click', goBackToStart);
+    
+        function startCountdown() {
+            // Prevent multiple clicks
+            document.getElementById("startButton").disabled = true;
+    
+            document.getElementById("startScreen").classList.add("hidden");
+            document.getElementById("countdownScreen").classList.remove("hidden");
+    
+            let countdownValue = 3;
+            document.getElementById("countdown").textContent = countdownValue;
+    
+            const countdownInterval = setInterval(() => {
+                countdownValue--;
+                if (countdownValue > 0) {
+                    document.getElementById("countdown").textContent = countdownValue;
+                } else {
+                    clearInterval(countdownInterval);
+                    start();
+                }
+            }, 1000);
+        }
+    
+        function start() {
+            startTime = new Date();
+            currentStep = 0;
+            document.getElementById("countdownScreen").classList.add("hidden");
+            document.getElementById("numberScreen").classList.remove("hidden");
+            nextNumber();
+        }
+    
+        function nextNumber() {
+            if (currentStep < totalSteps) {
+                const randomNum = Math.floor(Math.random() * 9) + 1;
+                const repeatTimes = Math.floor(Math.random() * 5) + 1;
+                const numberText = Array(repeatTimes).fill(randomNum).join(" ");
+
+                document.getElementById("randomNumber").textContent = numberText;
+                currentStep++;
+            } else {
+                const endTime = new Date();
+                const timeElapsed = ((endTime - startTime) / 1000).toFixed(2);
+                document.getElementById("numberScreen").classList.add("hidden");
+                document.getElementById("finalScreen").classList.remove("hidden");
+                document.getElementById("finalMessage").textContent = `It took you ${timeElapsed} seconds to finish. Please write down this time in the Google Form.`;
+            }
+        }
+    
+        function goBackToStart() {
+            document.getElementById("finalScreen").classList.add("hidden");
+            document.getElementById("startScreen").classList.remove("hidden");
+            // Reset the state
+            currentStep = 0;
+            startTime = null;
+            document.getElementById("startButton").disabled = false; // Re-enable the button
+        }
+    </script>
+    
+</body>
+</html>
