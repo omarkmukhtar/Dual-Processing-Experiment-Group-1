@@ -92,19 +92,21 @@
 
         function showNextNumbers() {
             if (currentRound < totalRounds) {
-                const a = Math.floor(Math.random() * 9) + 1;
-                const b = Math.floor(Math.random() * 9) + 1;
+                let a, b;
 
-                // Ensure a is greater than b
-                const [larger, smaller] = a > b ? [a, b] : [b, a];
+                // Ensure a is greater than b and they are not the same
+                do {
+                    a = Math.floor(Math.random() * 9) + 1;
+                    b = Math.floor(Math.random() * 9) + 1;
+                } while (a <= b); // Loop until a is greater than b
 
                 // Randomly decide the display order
                 const displayOrder = Math.random() < 0.5;
 
                 const numberDisplay = document.getElementById("number-display");
                 numberDisplay.innerHTML = displayOrder 
-                    ? `<span class="number">${larger}</span> <span class="smaller">${smaller}</span>` 
-                    : `<span class="smaller">${smaller}</span> <span class="number">${larger}</span>`;
+                    ? `<span class="number">${a}</span> <span class="smaller">${b}</span>` 
+                    : `<span class="smaller">${b}</span> <span class="number">${a}</span>`;
 
                 document.getElementById("number-screen").classList.remove("hidden");
                 document.getElementById("countdown-screen").classList.add("hidden");
