@@ -3,140 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Number Display</title>
+    <title>Random Numbers Challenge</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 50px;
+            padding: 50px;
         }
         .hidden {
             display: none;
         }
         .number {
-            font-size: 50px;
+            font-weight: bold;
         }
-        .smaller {
-            font-size: 30px;
+        .large {
+            font-size: 48px;
+        }
+        .small {
+            font-size: 24px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Start Screen -->
+    <!-- Starting Screen -->
     <div id="start-screen">
-        <h1>This is a description</h1>
+        <p>This is a description</p>
         <button id="start-button">Start</button>
     </div>
 
     <!-- Countdown Screen -->
     <div id="countdown-screen" class="hidden">
-        <h1>Starting in <span id="countdown">3</span>...</h1>
+        <p>Get ready! Starting in <span id="countdown">3</span>...</p>
     </div>
 
-    <!-- Number Screen -->
-    <div id="number-screen" class="hidden">
-        <h1 id="number-display"></h1>
+    <!-- Random Numbers Screen -->
+    <div id="numbers-screen" class="hidden">
+        <p class="number" id="random-numbers"></p>
         <button id="next-button">Next</button>
     </div>
 
-    <!-- Final Screen -->
-    <div id="final-screen" class="hidden">
-        <h1 id="final-message"></h1>
+    <!-- Results Screen -->
+    <div id="results-screen" class="hidden">
+        <p id="final-time"></p>
         <button id="restart-button">Go Back to Start</button>
     </div>
 
     <script>
-        let currentRound = 0;
+        const startButton = document.getElementById('start-button');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        const countdownElement = document.getElementById('countdown');
+        const randomNumbersElement = document.getElementById('random-numbers');
+        const finalTimeElement = document.getElementById('final-time');
+
+        let countdownInterval;
+        let totalTime = 0;
         let startTime;
-        const totalRounds = 20;
+        let count = 0;
+        const maxRounds = 20;
 
-        document.getElementById("start-button").onclick = function() {
-            startGame();
-        };
-
-        document.getElementById("next-button").onclick = function() {
-            showNextNumbers();
-        };
-
-        document.getElementById("restart-button").onclick = function() {
-            resetGame();
-        };
-
-        function startGame() {
-            document.getElementById("start-screen").classList.add("hidden");
-            document.getElementById("countdown-screen").classList.remove("hidden");
-            startCountdown();
+        // Function to show/hide screens
+        function showScreen(screenId) {
+            document.querySelectorAll('div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
         }
 
+        // Countdown before starting the random numbers
         function startCountdown() {
             let countdown = 3;
-            const countdownElement = document.getElementById("countdown");
+            showScreen('countdown-screen');
+            countdownElement.textContent = countdown;
 
-            const countdownInterval = setInterval(function() {
-                countdownElement.textContent = countdown;
+            countdownInterval = setInterval(() => {
                 countdown--;
-
-                if (countdown < 0) {
+                countdownElement.textContent = countdown;
+                if (countdown === 0) {
                     clearInterval(countdownInterval);
                     startTimer();
+                    showNextNumbers();
                 }
             }, 1000);
         }
 
+        // Start the timer
         function startTimer() {
             startTime = Date.now();
-            currentRound = 0;
-            showNextNumbers();
         }
 
+        // Show random numbers
         function showNextNumbers() {
-            if (currentRound < totalRounds) {
-                let a, b;
-
-                // Ensure a is greater than b and they are not the same
-                do {
-                    a = Math.floor(Math.random() * 9) + 1;
-                    b = Math.floor(Math.random() * 9) + 1;
-                } while (a <= b); // Loop until a is greater than b
-
-                // Randomly decide the display order
-                const displayOrder = Math.random() < 0.5;
-
-                const numberDisplay = document.getElementById("number-display");
-                numberDisplay.innerHTML = displayOrder 
-                    ? `<span class="number">${a}</span> <span class="smaller">${b}</span>` 
-                    : `<span class="smaller">${b}</span> <span class="number">${a}</span>`;
-
-                document.getElementById("number-screen").classList.remove("hidden");
-                document.getElementById("countdown-screen").classList.add("hidden");
-
-                currentRound++;
-            } else {
+            if (count >= maxRounds) {
                 endGame();
+                return;
             }
+
+            let a = Math.floor(Math.random() * 9) + 1;
+            let b;
+            do {
+                b = Math.floor(Math.random() * 9) + 1;
+            } while (b >= a);
+
+            const isReversed = Math.random() > 0.5;
+            let aClass = 'small', bClass = 'large';
+
+            if (isReversed) {
+                randomNumbersElement.innerHTML = `<span class="${bClass}">${b}</span> <span class="${aClass}">${a}</span>`;
+            } else {
+                randomNumbersElement.innerHTML = `<span class="${aClass}">${a}</span> <span class="${bClass}">${b}</span>`;
+            }
+
+            count++;
+            showScreen('numbers-screen');
         }
 
+        // End the game and show final time
         function endGame() {
-            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            document.getElementById("final-message").textContent = `It took you ${elapsedTime} seconds to finish`;
-            document.getElementById("number-screen").classList.add("hidden");
-            document.getElementById("final-screen").classList.remove("hidden");
+            totalTime = (Date.now() - startTime) / 1000;
+            finalTimeElement.textContent = `It took you ${totalTime.toFixed(2)} seconds to finish.`;
+            showScreen('results-screen');
         }
 
-        function resetGame() {
-            // Reset the game variables
-            currentRound = 0;
-            document.getElementById("final-screen").classList.add("hidden");
-            document.getElementById("countdown-screen").classList.add("hidden");
-            document.getElementById("start-screen").classList.remove("hidden");
+        // Restart everything
+        function restartGame() {
+            count = 0;
+            totalTime = 0;
+            showScreen('start-screen');
         }
 
-        // Ensure the reset works correctly when the game is restarted
-        function restartCountdown() {
-            resetGame();
-            document.getElementById("start-button").click(); // Automatically start the countdown
-        }
+        // Event listeners
+        startButton.addEventListener('click', startCountdown);
+        nextButton.addEventListener('click', showNextNumbers);
+        restartButton.addEventListener('click', restartGame);
+
     </script>
+
 </body>
 </html>
