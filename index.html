@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Reading Challenge</title>
+    <title>Random Number Display</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,108 +13,119 @@
         .hidden {
             display: none;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+        .number {
+            font-size: 50px;
         }
-        /* Added margin to the reset button */
-        #resetButton {
-            margin-top: 50px; /* Adjust this value as necessary */
+        .smaller {
+            font-size: 30px;
         }
     </style>
 </head>
 <body>
 
     <!-- Start Screen -->
-    <div id="startScreen">
-        <p>In this experiment, a series of repeated numbers will be displayed, and you must say the number that is being repeatedly displayed. For example, if "5 5 5" is shown, you must say "5". As soon as the numbers appear on your screen, read it as fast as you can and say the repeated number, and then click "Next" to go to the next set.</p>
-        <p>20 sets of numbers will be shown, and after you finish the last one, the total time it took you to go through all of the numbers will be shown.</p>
-        <p>If you would like to continue with the experiment, press "Start" to begin.</p>
-        <button id="startButton" type="button">Start</button>
+    <div id="start-screen">
+        <h1>This is a description</h1>
+        <button id="start-button">Start</button>
     </div>
 
     <!-- Countdown Screen -->
-    <div id="countdownScreen" class="hidden">
-        <h1 id="countdown"></h1>
+    <div id="countdown-screen" class="hidden">
+        <h1>Starting in <span id="countdown">3</span>...</h1>
     </div>
 
     <!-- Number Screen -->
-    <div id="numberScreen" class="hidden">
-        <h2 id="randomNumber"></h2>
-        <button id="nextButton" type="button">Next</button>
+    <div id="number-screen" class="hidden">
+        <h1 id="number-display"></h1>
+        <button id="next-button">Next</button>
     </div>
 
     <!-- Final Screen -->
-    <div id="finalScreen" class="hidden">
-        <h3 id="finalMessage"></h3>
-        <button id="resetButton" type="button">Go Back to Start</button>
+    <div id="final-screen" class="hidden">
+        <h1 id="final-message"></h1>
+        <button id="restart-button">Go Back to Start</button>
     </div>
 
     <script>
+        let currentRound = 0;
         let startTime;
-        let currentStep = 0;
-        const totalSteps = 20;
-    
-        document.getElementById('startButton').addEventListener('click', startCountdown);
-        document.getElementById('nextButton').addEventListener('click', nextNumber);
-        document.getElementById('resetButton').addEventListener('click', goBackToStart);
-    
+        const totalRounds = 20;
+
+        document.getElementById("start-button").onclick = function() {
+            startGame();
+        };
+
+        document.getElementById("next-button").onclick = function() {
+            showNextNumbers();
+        };
+
+        document.getElementById("restart-button").onclick = function() {
+            resetGame();
+        };
+
+        function startGame() {
+            document.getElementById("start-screen").classList.add("hidden");
+            document.getElementById("countdown-screen").classList.remove("hidden");
+            startCountdown();
+        }
+
         function startCountdown() {
-            // Prevent multiple clicks
-            document.getElementById("startButton").disabled = true;
-    
-            document.getElementById("startScreen").classList.add("hidden");
-            document.getElementById("countdownScreen").classList.remove("hidden");
-    
-            let countdownValue = 3;
-            document.getElementById("countdown").textContent = countdownValue;
-    
-            const countdownInterval = setInterval(() => {
-                countdownValue--;
-                if (countdownValue > 0) {
-                    document.getElementById("countdown").textContent = countdownValue;
-                } else {
+            let countdown = 3;
+            const countdownElement = document.getElementById("countdown");
+
+            const countdownInterval = setInterval(function() {
+                countdownElement.textContent = countdown;
+                countdown--;
+
+                if (countdown < 0) {
                     clearInterval(countdownInterval);
-                    start();
+                    startTimer();
                 }
             }, 1000);
         }
-    
-        function start() {
-            startTime = new Date();
-            currentStep = 0;
-            document.getElementById("countdownScreen").classList.add("hidden");
-            document.getElementById("numberScreen").classList.remove("hidden");
-            nextNumber();
-        }
-    
-        function nextNumber() {
-            if (currentStep < totalSteps) {
-                const randomNum = Math.floor(Math.random() * 9) + 1;
-                const repeatTimes = Math.floor(Math.random() * 5) + 1;
-                const numberText = Array(repeatTimes).fill(randomNum).join(" ");
 
-                document.getElementById("randomNumber").textContent = numberText;
-                currentStep++;
+        function startTimer() {
+            startTime = Date.now();
+            currentRound = 0;
+            showNextNumbers();
+        }
+
+        function showNextNumbers() {
+            if (currentRound < totalRounds) {
+                const a = Math.floor(Math.random() * 9) + 1;
+                const b = Math.floor(Math.random() * 9) + 1;
+
+                // Ensure a is greater than b
+                const [larger, smaller] = a > b ? [a, b] : [b, a];
+
+                // Randomly decide the display order
+                const displayOrder = Math.random() < 0.5;
+
+                const numberDisplay = document.getElementById("number-display");
+                numberDisplay.innerHTML = displayOrder 
+                    ? `<span class="number">${larger}</span> <span class="smaller">${smaller}</span>` 
+                    : `<span class="smaller">${smaller}</span> <span class="number">${larger}</span>`;
+
+                document.getElementById("number-screen").classList.remove("hidden");
+                document.getElementById("countdown-screen").classList.add("hidden");
+
+                currentRound++;
             } else {
-                const endTime = new Date();
-                const timeElapsed = ((endTime - startTime) / 1000).toFixed(2);
-                document.getElementById("numberScreen").classList.add("hidden");
-                document.getElementById("finalScreen").classList.remove("hidden");
-                document.getElementById("finalMessage").textContent = `It took you ${timeElapsed} seconds to finish. Please write down this time in the Google Form.`;
+                endGame();
             }
         }
-    
-        function goBackToStart() {
-            document.getElementById("finalScreen").classList.add("hidden");
-            document.getElementById("startScreen").classList.remove("hidden");
-            // Reset the state
-            currentStep = 0;
-            startTime = null;
-            document.getElementById("startButton").disabled = false; // Re-enable the button
+
+        function endGame() {
+            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            document.getElementById("final-message").textContent = `It took you ${elapsedTime} seconds to finish`;
+            document.getElementById("number-screen").classList.add("hidden");
+            document.getElementById("final-screen").classList.remove("hidden");
+        }
+
+        function resetGame() {
+            document.getElementById("final-screen").classList.add("hidden");
+            document.getElementById("start-screen").classList.remove("hidden");
         }
     </script>
-    
 </body>
 </html>
