@@ -125,10 +125,17 @@
         }
 
         function resetGame() {
+            // Reset the game variables
             currentRound = 0;
             document.getElementById("final-screen").classList.add("hidden");
             document.getElementById("countdown-screen").classList.add("hidden");
             document.getElementById("start-screen").classList.remove("hidden");
+        }
+
+        // Ensure the reset works correctly when the game is restarted
+        function restartCountdown() {
+            resetGame();
+            document.getElementById("start-button").click(); // Automatically start the countdown
         }
     </script>
 </body>
